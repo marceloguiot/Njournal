@@ -60,14 +60,12 @@
 
 <script>
 import { ref, onMounted } from 'vue';
-import { db } from '@/firebase';
+import { db, auth } from '@/firebase';
 import { collection, doc, getDoc } from 'firebase/firestore';
-import { useAuth } from '@/firebase';
+import { onAuthStateChanged } from "firebase/auth";
 
 export default {
   setup() {
-    const {user} = useAuth();
-    const userData = ref(user);
     const operationsList = ref([]);
     const totalTransacciones = ref(0);
     const pnlTotal = ref(0);
@@ -79,19 +77,17 @@ export default {
     const pnlAcumulado = ref(0);
     const factorBeneficio = ref(0);
 
-    const fetchOperations = async () => {
+    const fetchOperations = async (uid) => {
   
-      if (!user.value) return;
-      const docRef = doc(collection(db, 'operations_data'), user.value.uid);
+      if (!uid) return;
+      const docRef = doc(collection(db, 'operations_data'), uid);
       const docSnap = await getDoc(docRef);
-      console.log(user.uid);
       if (docSnap.exists()) {
         operationsList.value = docSnap.data().values.operations || [];
         
         calculateMetrics();
       }
     };
-    console.log(userData);
     const calculateMetrics = () => {
       totalTransacciones.value = operationsList.value.length;
       pnlTotal.value = operationsList.value.reduce((sum, op) => sum + (op.PNL || 0), 0);
@@ -104,7 +100,16 @@ export default {
       factorBeneficio.value = ganadoras.value > 0 ? (pnlTotal.value / (perdedoras.value || 1)) : 0;
     };
 
-    onMounted(fetchOperations);
+    onMounted(() => {
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          fetchOperations(user.uid);
+        } else {
+          console.warn("Usuario no autenticado");
+          loading.value = false;
+        }
+      });
+    });
 
     const operacionesOptions = {
       chart: { type: 'pie' },
