@@ -9,6 +9,7 @@ import Alertas from '@/views/Alertas.vue';
 import Calendario from '@/views/Calendario.vue';
 import CalendarioTrading from '@/views/CalendarioTrading.vue';
 import Metricas from '@/views/Metricas.vue';
+import Login from "@/views/Login.vue";
 
 const routes = [
   {
@@ -16,6 +17,7 @@ const routes = [
     name: 'home',
     component: HomeView
   },
+  { path: "/login", name: 'login', component: Login },
   {
     path: '/about',
     name: 'about',
@@ -26,7 +28,7 @@ const routes = [
       return import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
     }
   },
-  { path: '/habitos', name: 'home', component: Habitos },
+  { path: '/habitos', name: 'habitos', component: Habitos },
   { path: '/trading', name: 'trading', component: Trading },
   { path: '/bitacora', name: 'bitacora', component: Bitacora },
   { path: '/cartera', name: 'cartera', component: Cartera },
